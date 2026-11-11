@@ -1,0 +1,27 @@
+[Unit]
+Description=Snapshot cold Elasticsearch backing indices to OSS and delete them
+Wants=network-online.target
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+User=elk-archive
+Group=elk-archive
+EnvironmentFile=/etc/elk-cold-archive/runtime.env
+StateDirectory=elk-cold-archive
+RuntimeDirectory=elk-cold-archive
+ExecStart=/usr/bin/python3 /opt/elk-cold-archive/archive.py --config /etc/elk-cold-archive/config.json $ARCHIVE_MODE
+TimeoutStartSec=25h
+UMask=0077
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+LockPersonality=true
+RestrictSUIDSGID=true
+
+[Install]
+WantedBy=multi-user.target

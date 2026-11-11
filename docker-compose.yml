@@ -1,0 +1,72 @@
+name: elk-cold-archive
+
+services:
+  cold-archive:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: elk-cold-archive:1.2.0
+    container_name: elk-cold-archive
+    user: "${HOST_UID:-0}:${HOST_GID:-0}"
+    init: true
+    restart: unless-stopped
+    environment:
+      TZ: "${SCHEDULE_TIMEZONE:-Asia/Shanghai}"
+      ARCHIVE_CONFIG: /config/config.json
+      ARCHIVE_EXECUTE: "${ARCHIVE_EXECUTE:-false}"
+      ES_EXPECTED_CLUSTER_UUID: "${ES_EXPECTED_CLUSTER_UUID:-}"
+      ES_USERNAME: "${ES_USERNAME:-}"
+      ES_CA_CERT: "${ES_CA_CERT:-}"
+      ES_API_KEY_FILE: /run/secrets/es_api_key
+      ES_PASSWORD_FILE: /run/secrets/es_password
+      SMTP_PASSWORD_FILE: /run/secrets/smtp_password
+      SCHEDULE_TIMEZONE: "${SCHEDULE_TIMEZONE:-Asia/Shanghai}"
+      SCHEDULE_TIME: "${SCHEDULE_TIME:-02:00}"
+      MAX_RETRIES: "${MAX_RETRIES:-2}"
+      RETRY_MINUTES: "${RETRY_MINUTES:-30}"
+      SCHEDULER_STATE_FILE: /state/scheduler.json
+      HEARTBEAT_FILE: /state/heartbeat
+      HEALTH_MAX_AGE_SECONDS: "${HEALTH_MAX_AGE_SECONDS:-180}"
+    volumes:
+      - type: bind
+        source: ./config.compose.json
+        target: /config/config.json
+        read_only: true
+      - type: bind
+        source: ./data
+        target: /state
+      - type: bind
+        source: ./certs
+        target: /certs
+        read_only: true
+    secrets:
+      - es_api_key
+      - es_password
+      - smtp_password
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    healthcheck:
+      test: ["CMD", "python", "/app/scheduler.py", "--healthcheck"]
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+secrets:
+  es_api_key:
+    file: ./secrets/es_api_key
+  es_password:
+    file: ./secrets/es_password
+  smtp_password:
+    file: ./secrets/smtp_password

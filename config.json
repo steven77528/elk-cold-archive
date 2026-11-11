@@ -1,0 +1,81 @@
+{
+  "elasticsearch": {
+    "url": "https://elk-ops.mannengpao.com:10443",
+    "expected_version": "8.19.2",
+    "expected_cluster_uuid": "",
+    "repository": "oss_s3_backup",
+    "snapshot_prefix": "cold-archive",
+    "request_timeout_seconds": 60,
+    "auth": {
+      "type": "auto",
+      "api_key_env": "ES_API_KEY",
+      "api_key_file_env": "ES_API_KEY_FILE",
+      "username_env": "ES_USERNAME",
+      "password_env": "ES_PASSWORD",
+      "password_file_env": "ES_PASSWORD_FILE"
+    },
+    "tls": {
+      "verify": true,
+      "ca_file_env": "ES_CA_CERT"
+    }
+  },
+  "repository_guard": {
+    "uuid": "V_kt03p6SkWfmq6l_R8P6g",
+    "type": "s3",
+    "settings": {
+      "bucket": "hycen-elk-cold-data",
+      "client": "oss",
+      "path_style_access": "false",
+      "base_path": "elasticsearch/snapshots",
+      "endpoint": "oss-cn-hangzhou-internal.aliyuncs.com",
+      "compress": "true"
+    }
+  },
+  "selection": {
+    "timezone": "Asia/Shanghai",
+    "rules": [
+      {
+        "name": "gateway-7-to-30-days",
+        "data_stream_patterns": [
+          "logs-gateway-*"
+        ],
+        "min_age_days": 7,
+        "max_age_days": 30
+      },
+      {
+        "name": "other-60-to-90-days",
+        "data_stream_patterns": [
+          "logs-hdg-hdg",
+          "logs-standalone-*",
+          "logs-nginx-*"
+        ],
+        "min_age_days": 60,
+        "max_age_days": 90
+      }
+    ],
+    "max_indices_per_run": 100,
+    "max_data_streams_per_snapshot": 10
+  },
+  "execution": {
+    "snapshot_poll_seconds": 15,
+    "snapshot_timeout_seconds": 21600,
+    "snapshot_missing_grace_seconds": 60,
+    "max_run_seconds": 82800,
+    "lock_file": "/run/elk-cold-archive/archive.lock",
+    "state_file": "/var/lib/elk-cold-archive/transaction.json",
+    "audit_log": "/var/lib/elk-cold-archive/audit.jsonl"
+  },
+  "mail": {
+    "enabled": true,
+    "host": "smtp.126.com",
+    "port": 465,
+    "security": "ssl",
+    "username": "",
+    "password_env": "SMTP_PASSWORD",
+    "password_file_env": "SMTP_PASSWORD_FILE",
+    "from": "",
+    "to": [],
+    "require_ready_before_delete": true,
+    "timeout_seconds": 30
+  }
+}

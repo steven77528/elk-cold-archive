@@ -1,0 +1,11 @@
+[Unit]
+Description=Run Elasticsearch cold-data archive daily at 02:00 Asia/Shanghai
+
+[Timer]
+OnCalendar=*-*-* 02:00:00 Asia/Shanghai
+Persistent=true
+AccuracySec=1min
+Unit=elk-cold-archive.service
+
+[Install]
+WantedBy=timers.target

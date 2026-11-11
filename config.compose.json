@@ -1,0 +1,106 @@
+{
+  "elasticsearch": {
+    "url": "http://10.10.0.10:9200",
+    "expected_version": "8.19.12",
+    "expected_cluster_uuid": "",
+    "repository": "oss_s3_backup",
+    "snapshot_prefix": "cold-archive",
+    "request_timeout_seconds": 60,
+    "auth": {
+      "type": "auto",
+      "api_key_env": "ES_API_KEY",
+      "api_key_file_env": "ES_API_KEY_FILE",
+      "username_env": "ES_USERNAME",
+      "password_env": "ES_PASSWORD",
+      "password_file_env": "ES_PASSWORD_FILE"
+    },
+    "tls": {
+      "verify": true,
+      "ca_file_env": "ES_CA_CERT"
+    }
+  },
+  "repository_guard": {
+    "uuid": "V_kt03p6SkWfmq6l_R8P6g",
+    "type": "s3",
+    "settings": {
+      "bucket": "hycen-elk-cold-data",
+      "client": "oss",
+      "path_style_access": "false",
+      "base_path": "elasticsearch/snapshots",
+      "endpoint": "oss-cn-hangzhou-internal.aliyuncs.com",
+      "compress": "true"
+    }
+  },
+  "snapshot_cleanup": {
+    "enabled": true,
+    "max_deletions_per_run": 30
+  },
+  "selection": {
+    "timezone": "Asia/Shanghai",
+    "rollover_time_overrides": [
+      {
+        "index": ".ds-logs-gateway-hdg-2026.08.04-000146",
+        "index_uuid": "R-V-Z-NFS7ODjwS8mNmZYQ",
+        "rollover_time_ms": 1786605291333,
+        "reason": "Reviewed ILM lifecycle_date for restored backing index without rollover_info"
+      },
+      {
+        "index": ".ds-logs-gateway-newhdg-2026.08.04-000078",
+        "index_uuid": "teSeGKljQjKnG8TqMH-zng",
+        "rollover_time_ms": 1786605291307,
+        "reason": "Reviewed ILM lifecycle_date for restored backing index without rollover_info"
+      }
+    ],
+    "rules": [
+      {
+        "name": "gateway-10-to-20-days",
+        "data_stream_patterns": [
+          "logs-gateway-*"
+        ],
+        "min_age_days": 10,
+        "max_age_days": 20
+      },
+      {
+        "name": "nginx-15-to-30-days",
+        "data_stream_patterns": [
+          "logs-nginx-*"
+        ],
+        "min_age_days": 15,
+        "max_age_days": 30
+      },
+      {
+        "name": "other-45-to-225-days",
+        "data_stream_patterns": [
+          "logs-hdg-hdg",
+          "logs-standalone-*"
+        ],
+        "min_age_days": 45,
+        "max_age_days": 225
+      }
+    ],
+    "max_indices_per_run": 100,
+    "max_data_streams_per_snapshot": 10
+  },
+  "execution": {
+    "snapshot_poll_seconds": 15,
+    "snapshot_timeout_seconds": 21600,
+    "snapshot_missing_grace_seconds": 60,
+    "max_run_seconds": 82800,
+    "lock_file": "/state/archive.lock",
+    "state_file": "/state/transaction.json",
+    "audit_log": "/state/audit.jsonl"
+  },
+  "mail": {
+    "enabled": true,
+    "host": "smtp.126.com",
+    "port": 465,
+    "security": "ssl",
+    "username": "",
+    "password_env": "SMTP_PASSWORD",
+    "password_file_env": "SMTP_PASSWORD_FILE",
+    "from": "",
+    "to": [],
+    "require_ready_before_delete": true,
+    "timeout_seconds": 30
+  }
+}
